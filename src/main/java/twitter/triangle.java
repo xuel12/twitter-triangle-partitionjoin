@@ -2,6 +2,8 @@ package twitter;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
+import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.IntWritable;
@@ -22,8 +24,7 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -277,14 +278,27 @@ public class triangle extends Configured implements Tool {
         }
         int code = job3.waitForCompletion(true) ? 0 : 1;
         if (code == 0) {
-            FileWriter fileWriter = new FileWriter(args[1] + "/final/count.txt");
+//            FileWriter fileWriter = new FileWriter(args[1] + "/final/count.txt");
+
+            // Check if the file already exists
+//            if (fileSystem.exists(path)) {
+//                System.out.println("File " + dest + " already exists");
+//                return;
+//            }
+
+            // Create a new file and write data to it.
+            FileSystem fileSystem = FileSystem.get(conf3);
+            Path path = new Path(args[1] + "/final/count.txt");
+            FSDataOutputStream out = fileSystem.create(path);
 
             for (Counter counter : job3.getCounters().getGroup(path3Reducer.TRIANGLE_COUNTER)) {
                 String fileContent = counter.getDisplayName() + '\t' + counter.getValue();
-                fileWriter.write(fileContent);
-                fileWriter.close();
+                out.writeBytes(fileContent);
                 System.out.println(counter.getDisplayName() + '\t' + counter.getValue());
             }
+            // Close all the file descripters
+            out.close();
+            fileSystem.close();
         }
         return (code);
     }

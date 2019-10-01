@@ -1,6 +1,6 @@
-# CS6240MR
+# Twitter Triangle Count - partition join
 
-Hadoop MapReduce WordCount Demo
+Hadoop Twitter Triangle Count using partition join
 Example code for CS6240
 Fall 2019
 
