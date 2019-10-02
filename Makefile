@@ -6,7 +6,7 @@
 hadoop.root=/usr/local/opt/hadoop-2.8.5
 jar.name=triangle-1.0.jar
 jar.path=target/${jar.name}
-job.name=twitter.triangle
+job.name=twitter.triangle_partitionjoin
 local.input=input
 local.output=output
 # Pseudo-Cluster Execution

@@ -1,8 +1,6 @@
-twitter/triangle$path2Mapper.class
-twitter/triangle$path3Reducer.class
-twitter/triangle$path2Reducer.class
-twitter/triangle$path3Mapper.class
-twitter/triangle$path2countReducer.class
-twitter/triangle$csvMapper.class
-twitter/triangle$path2countMapper.class
-twitter/triangle.class
+twitter/triangle_partitionjoin$csvMapper.class
+twitter/triangle_partitionjoin$path3Reducer.class
+twitter/triangle_partitionjoin$path3Mapper.class
+twitter/triangle_partitionjoin$path2Reducer.class
+twitter/triangle_partitionjoin$path2Mapper.class
+twitter/triangle_partitionjoin.class

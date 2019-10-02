@@ -3,6 +3,8 @@
 
 # data file
 data/
+output/
+doc/
 
 # Log file
 *.log
