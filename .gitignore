@@ -5,6 +5,7 @@ q# Compiled class file
 data/
 output/
 doc/
+result/
 
 # Log file
 *.log

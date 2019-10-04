@@ -25,11 +25,12 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import java.io.*;
+import java.net.URI;
 import java.util.ArrayList;
 
 
-public class triangle_partitionjoin extends Configured implements Tool {
-    private static final Logger logger = LogManager.getLogger(triangle_partitionjoin.class);
+public class triangle extends Configured implements Tool {
+    private static final Logger logger = LogManager.getLogger(triangle.class);
     static final Integer MAX = 1000;
 
     public static class path2Mapper extends Mapper<Object, Text, Text, Text> {
@@ -115,6 +116,7 @@ public class triangle_partitionjoin extends Configured implements Tool {
         @Override
         public void reduce(final Text key, final Iterable<Text> values, final Context context) throws IOException, InterruptedException {
             int sum = 0;
+            context.getCounter(TRIANGLE_COUNTER, "Number of triangle (not unique):").increment(0);
             int flag = 0;
             for(Text val: values) {
                 String[] tokens = val.toString().split(DELIMITER);
@@ -140,7 +142,7 @@ public class triangle_partitionjoin extends Configured implements Tool {
         // job one: join edge into path2
         final Configuration conf1 = getConf();
         final Job job1 = Job.getInstance(conf1, "path2");
-        job1.setJarByClass(triangle_partitionjoin.class);
+        job1.setJarByClass(triangle.class);
 
         FileInputFormat.setInputPaths(job1, new Path(args[0]));
         FileOutputFormat.setOutputPath(job1, new Path(args[1]+"/temp1"));
@@ -161,7 +163,7 @@ public class triangle_partitionjoin extends Configured implements Tool {
         Configuration conf2 = getConf();
 
         final Job job2 = Job.getInstance(conf2, "path3");
-        job2.setJarByClass(triangle_partitionjoin.class);
+        job2.setJarByClass(triangle.class);
 
         MultipleInputs.addInputPath(job2, new Path(args[1] + "/temp1"), KeyValueTextInputFormat.class, path3Mapper.class);
         MultipleInputs.addInputPath(job2, new Path(args[0]), TextInputFormat.class, csvMapper.class);
@@ -200,18 +202,18 @@ public class triangle_partitionjoin extends Configured implements Tool {
         int code = job2.waitForCompletion(true) ? 0 : 1;
         if (code == 0) {
             // Create a new file and write data to it.
-            FileSystem fileSystem = FileSystem.get(conf2);
-            Path path = new Path(args[1] + "/final/count.txt");
-            FSDataOutputStream out = fileSystem.create(path);
+            FileSystem fileSystem = FileSystem.get(URI.create(args[1] + "/final/"),conf2);
+            FSDataOutputStream fsDataOutputStream = fileSystem.create(new Path(args[1] + "/final" + "/trianglecount"));
+            PrintWriter writer  = new PrintWriter(fsDataOutputStream);
 
             for (Counter counter : job2.getCounters().getGroup(path3Reducer.TRIANGLE_COUNTER)) {
                 String fileContent = "Number of triangle (unique):" + '\t' + counter.getValue()/3;
-                out.writeBytes(fileContent);
+                writer.write(fileContent);
                 System.out.println("Number of triangle (unique):" + '\t' + counter.getValue()/3);
             }
             // Close all the file descriptors
-            out.close();
-            fileSystem.close();
+            writer.close();
+            fsDataOutputStream.close();
         }
         return (code);
     }
@@ -222,7 +224,7 @@ public class triangle_partitionjoin extends Configured implements Tool {
         }
 
         try {
-            ToolRunner.run(new triangle_partitionjoin(), args);
+            ToolRunner.run(new triangle(), args);
         } catch (final Exception e) {
             logger.error("", e);
         }
